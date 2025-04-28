@@ -2,21 +2,21 @@ import React from 'react'
 
 const Navbar = () => {
   return (
-    <div className='w-full flex gap-10 absolute top-0 items-center justify-between bg-transparent px-10 py-2'>
-        <h1 className='text-blue-800 w-fit font-bold text-3xl'>PropBid</h1>
-        <div className='flex items-center gap-10'>
-            <ul className='flex items-center gap-10 text-xl font-medium'>
-              <li>Home</li>
-              <li>Properties</li>
-              <li>Search</li>
-            </ul>
-            <button className='flex bg-blue-600 rounded-xl px-5 py-2 text-white items-center gap-2'>
-            <svg xmlns="http://www.w3.org/2000/svg" width={20} viewBox="0 0 512 512">
-              <path fill="#ffffff" d="M217.9 105.9L340.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L217.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1L32 320c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM352 416l64 0c17.7 0 32-14.3 32-32l0-256c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c53 0 96 43 96 96l0 256c0 53-43 96-96 96l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32z"/>
-            </svg>
-              Login
-            </button>
-        </div>
+    <div className='w-full z-10 flex gap-10 absolute top-0 items-center justify-between bg-transparent px-10 py-2'>
+      <h1 className='text-blue-800 w-fit font-bold text-3xl'>PropBid</h1>
+      <div className='flex items-center gap-10'>
+        <ul className='flex items-center gap-10 text-xl font-medium'>
+          <li className='cursor-pointer hover:underline hover:scale-105 duration-200 underline-offset-4'>Home</li>
+          <li className='cursor-pointer hover:underline hover:scale-105 duration-200 underline-offset-4'>Properties</li>
+          <li className='cursor-pointer hover:underline hover:scale-105 duration-200 underline-offset-4'>Search</li>
+        </ul>
+        <button className='flex bg-blue-600 hover:scale-105 duration-200 rounded-xl px-5 py-2 cursor-pointer text-white items-center gap-2'>
+          <svg xmlns="http://www.w3.org/2000/svg" width={20} viewBox="0 0 512 512">
+            <path fill="#ffffff" d="M217.9 105.9L340.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L217.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1L32 320c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM352 416l64 0c17.7 0 32-14.3 32-32l0-256c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c53 0 96 43 96 96l0 256c0 53-43 96-96 96l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32z" />
+          </svg>
+          Login
+        </button>
+      </div>
     </div>
   )
 }
