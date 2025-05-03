@@ -1,23 +1,48 @@
-import React from 'react'
+"use client"
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 
-const Navbar = () => {
+const Navbar = ({ cs, isLoggedIn }) => {
+  const [scrolled, setScrolled] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter();
+  const handleLogin = ()=>{
+    router.push('/login')
+  }
+  const handleLogout = ()=>{
+    localStorage.removeItem("token")
+    localStorage.removeItem("email")
+    router.push('/')
+  }
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  })
   return (
-    <div className='w-full z-10 flex gap-10 absolute top-0 items-center justify-between bg-transparent px-10 py-2'>
+    <nav className={`${cs} w-full z-50 flex items-center justify-between lg:px-28 md:px-16 px-10 py-5 transition-all duration-300 shadow-sm ${scrolled || isOpen ? 'bg-white shadow-md' : 'bg-transparent'
+      }`}>
       <h1 className='text-blue-800 w-fit font-bold text-3xl'>PropBid</h1>
       <div className='flex items-center gap-10'>
-        <ul className='flex items-center gap-10 text-xl font-medium'>
-          <li className='cursor-pointer hover:underline hover:scale-105 duration-200 underline-offset-4'>Home</li>
-          <li className='cursor-pointer hover:underline hover:scale-105 duration-200 underline-offset-4'>Properties</li>
-          <li className='cursor-pointer hover:underline hover:scale-105 duration-200 underline-offset-4'>Search</li>
+        <ul className='items-center gap-10 hidden md:flex text-lg text-black font-medium'>
+          <li className='cursor-pointer hover:underline hover:scale-105 duration-200 underline-offset-4 transition-all'>Home</li>
+          <li className='cursor-pointer hover:underline hover:scale-105 duration-200 underline-offset-4 transition-all'>Properties</li>
+          <li className='cursor-pointer hover:underline hover:scale-105 duration-200 underline-offset-4 transition-all'>Search</li>
         </ul>
-        <button className='flex bg-blue-600 hover:scale-105 duration-200 rounded-xl px-5 py-2 cursor-pointer text-white items-center gap-2'>
-          <svg xmlns="http://www.w3.org/2000/svg" width={20} viewBox="0 0 512 512">
-            <path fill="#ffffff" d="M217.9 105.9L340.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L217.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1L32 320c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM352 416l64 0c17.7 0 32-14.3 32-32l0-256c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c53 0 96 43 96 96l0 256c0 53-43 96-96 96l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32z" />
-          </svg>
-          Login
+        <button className={`flex ${isLoggedIn ? "bg-red-500" : "bg-blue-600"} hover:scale-105 duration-200 rounded-lg text-center cursor-pointer text-white items-center gap-2`} onClick={isLoggedIn ? handleLogout:handleLogin}>
+          <a className="bg-primary-700 z-20 text-white hover:bg-primary-800 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center" href="/login">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-in mr-1"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg> {isLoggedIn ? "Logout" : "Login"}</a>
         </button>
       </div>
-    </div>
+    </nav>
   )
 }
 
