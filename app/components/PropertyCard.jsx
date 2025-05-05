@@ -1,15 +1,13 @@
-// components/PropertyCard.js
 "use client";
 import React, { useState } from 'react';
 import { Bath, Bed, Heart, MapPin, Maximize } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
-const PropertyCard = ({ property }) => {
+const PropertyCard = ({ property,image }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [saved, setSaved] = useState(false);
-
+  const [savedProps, setsavedProps] = useState([])
   const handleSaveClick = () => {
-    setSaved(!saved);
     // Implement your save logic here
   };
 
@@ -19,10 +17,10 @@ const PropertyCard = ({ property }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/property/${property.id}`} className="block">
+      <div className="block">
         <div className="relative">
-          <img
-            src={property.image}
+          <Image
+            src={image}
             alt={property.title}
             className="w-full h-52 object-cover transition-transform duration-300"
             style={{ transform: isHovered ? 'scale-105' : 'scale-100' }}
@@ -31,10 +29,10 @@ const PropertyCard = ({ property }) => {
           <button
             onClick={handleSaveClick}
             className={`absolute top-3 right-3 p-2 rounded-full transition-colors duration-300 ${
-              saved ? 'bg-red-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              savedProps.length>0 ? 'bg-red-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
-            <Heart size={18} fill={saved ? 'white' : 'none'} stroke={saved ? 'none' : 'currentColor'} />
+            <Heart size={18} className='cursor-pointer hover:scale-115 duration-200' fill={savedProps.length>0 ? 'white' : 'none'} stroke={savedProps.length>0 ? 'none' : 'currentColor'} />
           </button>
         </div>
 
@@ -67,7 +65,7 @@ const PropertyCard = ({ property }) => {
             </div>
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   );
 };
