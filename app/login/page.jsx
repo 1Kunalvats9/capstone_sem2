@@ -24,11 +24,11 @@ const page = () => {
       })
       const result = await res.json()
       if (res.ok) {
-        console.log('User created:', result.user);
-        toast.success("Logged in Successfully")
+        toast.success("User registered Successfully")
         router.push('/login');
       } else {
         console.error('Error in registering the user', result.error);
+        toast.error("Error in registering the user.")
       }
 
 
@@ -53,8 +53,8 @@ const page = () => {
       }else{
         localStorage.setItem("token",response.token)
         localStorage.setItem("email",email)
-        alert("User logged in successfully")
-        router.push("/dashboard")
+        toast.success("User logged in successfully")
+        router.push("/home")
       }
     } catch (err) {
       console.log("Error while signing up", err)
