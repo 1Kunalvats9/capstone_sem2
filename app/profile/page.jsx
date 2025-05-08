@@ -45,6 +45,12 @@ const page = () => {
                 <h1 className=' bg-clip-text text-transparent bg-gradient-to-r text-2xl font-bold from-[#36BCF6] to-[#8FCEF9]'>Name: <span className='text-white font-medium'>{user.userName}</span></h1>
                 <h1 className='bg-clip-text text-transparent bg-gradient-to-r text-2xl font-bold from-[#36BCF6] to-[#8FCEF9]'>Email: <span className='text-white font-medium'>{user.email}</span></h1>
                 <h1 className=' bg-clip-text text-transparent bg-gradient-to-r text-2xl font-bold from-[#36BCF6] to-[#8FCEF9]'>Saved Properties: <span className='text-white font-medium'>{user.saved.properties.length}</span></h1>
+                <button className='px-3 py-2 bg-red-600 text-white mt-10 cursor-pointer rounded-xl' onClick={()=>{
+                  localStorage.removeItem("email")
+                  localStorage.removeItem("token")
+                  router.push('/home')
+                  toast.success("User logged out successfully")
+                }}>Logout</button>
               </div>
             </div>
             <div className='rounded-2xl grid grid-cols-1 gap-10 col-span-2 md:px-8 '>

@@ -6,6 +6,7 @@ import { generateProperties } from '@/lib/generateProperties'
 import images from "@/lib/img"
 import Image from 'next/image'
 import PropertyCard from '../components/PropertyCard'
+import toast from 'react-hot-toast'
 
 const page = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(true)
@@ -29,6 +30,7 @@ const page = () => {
         setProps();
     if(!email){
       setIsLoggedIn(false)
+      toast.error("Please login first")
       router.push("/home")
     }else{
       setIsLoggedIn(true)
