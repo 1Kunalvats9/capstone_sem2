@@ -39,6 +39,7 @@ const ProfilePage = () => {
 
                 const data = await res.json();
                 setUser(data.user);
+                console.log(data.user.saved.properties)
             } catch (error) {
                 toast.error("Failed to fetch user data");
                 router.push('/');
@@ -66,9 +67,9 @@ const ProfilePage = () => {
                         </div>
                     </div>
                 ) : user ? (
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
 
-                        <div className="col-span-2 bg-gray-800 h-fit rounded-xl p-6 shadow-lg border border-gray-700">
+                        <div className="col-span-2 bg-[#1A1919] h-fit rounded-xl p-6 shadow-lg">
                             <div className="flex flex-col  items-start gap-6">
 
                                 <div className="space-y-4">
@@ -82,7 +83,7 @@ const ProfilePage = () => {
                                         Saved Properties: <span className="text-white font-medium">{user.saved.properties.length}</span>
                                     </p>
                                     <button
-                                        className="mt-6 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors"
+                                        className="mt-6 bg-red-600/50 hover:bg-red-700/50 cursor-pointer text-white px-4 py-2 rounded-md transition-colors"
                                         onClick={() => {
                                             localStorage.removeItem("email");
                                             localStorage.removeItem("token");
@@ -97,7 +98,7 @@ const ProfilePage = () => {
                         </div>
 
 
-                        <div className="col-span-3 grid grid-cols-1 gap-6">
+                        <div className="col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {user.saved.properties.length > 0 ? (
                                 user.saved.properties.map((item, index) => {
                                     return <PropertyCard key={index} property={item} image={images[index % images.length]} />;

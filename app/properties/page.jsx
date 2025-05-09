@@ -7,6 +7,7 @@ import images from "@/lib/img"
 import Image from 'next/image'
 import PropertyCard from '../components/PropertyCard'
 import toast from 'react-hot-toast'
+import { Home, LogOut } from 'lucide-react'
 
 const page = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(true)
@@ -51,7 +52,7 @@ const page = () => {
         </div>
       }
       <input type="text" placeholder='Search for properties by name or location....' className='w-full border border-gray-500 rounded-lg outline-none placeholder:font-light placeholder-gray-400 my-16 px-3 py-2' onChange={(e)=>{setSearchQuery(e.target.value)}} />
-      <div className='w-full grid gap-4 grid-cols-2 my-10 md:grid-cols-3'>
+      <div className='w-full grid gap-4 grid-cols-1 my-10 md:grid-cols-3'>
         {
           searchQuery ? 
           (

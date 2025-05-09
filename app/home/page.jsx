@@ -118,7 +118,7 @@ const page = () => {
           <h1 className='text-xl md:text-3xl font-semibold text-white'>Featured Properties</h1>
           <a href="/properties" className='text-blue-300 cursor-pointer text-md md:text-xl'>View all</a>
         </div>
-        <div className='grid grid-cols-2 gap-2 md:grid-cols-3 my-5 lg:grid-cols-4 place-items-center'>
+        <div className='grid grid-cols-1 gap-6 md:gap-6 md:grid-cols-3 my-5 lg:grid-cols-4 place-items-center'>
           {
             properties && featuredProperties && featuredProperties.map((item, idx) => {
               return (

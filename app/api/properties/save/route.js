@@ -1,5 +1,5 @@
 import { connectToMongoDb } from "@/lib/connectMongoDb";
-import User from "@/models/userModel"; 
+import User from "@/models/userModel";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
@@ -9,6 +9,12 @@ export async function POST(req) {
 
     if (!email || !property) {
       return NextResponse.json({ error: 'Missing email or property' }, { status: 400 });
+    }
+
+    const { id, bathrooms, bedrooms, location, price, sizeSqFt, title } = property;
+
+    if (!id || bathrooms === undefined || bedrooms === undefined || !location || price === undefined || !sizeSqFt || !title) {
+      return NextResponse.json({ error: 'Missing required property details (id, bathroom, bedroom, location, price, sizeSqFt, title)' }, { status: 400 });
     }
 
     const user = await User.findOne({ email });
@@ -22,13 +28,28 @@ export async function POST(req) {
       user.saved.properties = [];
     }
 
-    user.saved.properties.push(property);
-    await user.save();
+    const existingPropertyIndex = user.saved.properties.findIndex(
+      (savedProperty) => savedProperty.id === id
+    );
 
-    return NextResponse.json({ message: 'Property saved successfully', saved: user.saved }, { status: 200 });
+    if (existingPropertyIndex === -1) {
+      user.saved.properties.push({
+        id,
+        bathrooms, 
+        bedrooms,  
+        location,
+        price,
+        sizeSqFt,
+        title,
+      });
+      await user.save();
+      return NextResponse.json({ message: 'Property saved successfully', saved: user.saved }, { status: 200 });
+    } else {
+      return NextResponse.json({ message: 'Property is already saved' }, { status: 200 });
+    }
 
   } catch (error) {
     console.error('Error saving property:', error);
-    return NextResponse.json({ error: 'Failed to save property' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to save property', message: error.message || 'Server error during save' }, { status: 500 });
   }
 }
