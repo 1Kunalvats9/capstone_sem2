@@ -39,7 +39,7 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="/#search" className="text-gray-400 hover:text-white transition-colors duration-200">
+                <a href="/properties" className="text-gray-400 hover:text-white transition-colors duration-200">
                   Search Properties
                 </a>
               </li>
@@ -56,7 +56,7 @@ const Footer = () => {
             <ul className="mt-4 space-y-2">
               <li className="flex items-center">
                 <MapPin size={16} className="mr-2 text-gray-400" />
-                <span className="text-gray-400">1234 Sonipa, Haryana</span>
+                <span className="text-gray-400">1234 Sonipat, Haryana</span>
               </li>
               <li className="flex items-center">
                 <Phone size={16} className="mr-2 text-gray-400" />

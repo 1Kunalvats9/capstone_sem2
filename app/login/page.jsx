@@ -10,6 +10,7 @@ const page = () => {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [error, seterror] = useState("")
   const router= useRouter()
   const handleSignUp = async (e) => {
@@ -40,6 +41,7 @@ const page = () => {
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
+      setIsLoggingIn(true)
       const res = await fetch('/api/login',{
         method:"POST",
         headers: {
@@ -49,15 +51,19 @@ const page = () => {
       })
       const response = await res.json()
       if(!res.ok){
+        setIsLoggingIn(false)
         seterror(response.error)
       }else{
         localStorage.setItem("token",response.token)
         localStorage.setItem("email",email)
+        setIsLoggingIn(false)
         toast.success("User logged in successfully")
         router.push("/home")
       }
     } catch (err) {
       console.log("Error while signing up", err)
+    }finally{
+      setIsLoggingIn(false)
     }
   }
 
@@ -134,8 +140,8 @@ const page = () => {
                     </div>
                     {error && <p className='text-red-500'>{error}</p>}
 
-                    <button type="submit" className="mt-8 w-full h-11 rounded-full text-white bg-[#0084C7] hover:opacity-90 transition-opacity cursor-pointer">
-                      Login
+                    <button type="submit" className="mt-8 w-full h-11 rounded-full text-white bg-[#0084C7] hover:opacity-90 transition-all duration-200 cursor-pointer">
+                      {isLoggingIn ? "Logging In":"Login"}
                     </button>
                     <p className="text-gray-500/90 text-sm mt-4">Don’t have an account? <a className="text-blue-300 hover:underline" onClick={() => { setOpenSignUp(true) }} href="#">Sign up</a></p>
                   </form>

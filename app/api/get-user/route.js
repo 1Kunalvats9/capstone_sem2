@@ -10,7 +10,6 @@ export async function POST(req){
         if(!user){
             return NextResponse.json({mssg:"User not found"},{status:404})
         }
-        console.log(user)
         return NextResponse.json({user},{status:200})
 
     }catch(err){
