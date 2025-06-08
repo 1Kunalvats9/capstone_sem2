@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 
-// --- Property Schema ---
 const propertySchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -85,7 +84,6 @@ const propertySchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// --- Bid Schema ---
 const bidSchema = new mongoose.Schema({
   property: {
     type: mongoose.Schema.Types.ObjectId,
@@ -108,12 +106,10 @@ const bidSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// --- User Schema ---
 const userSchema = new mongoose.Schema({
   userName: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
   },
   email: {
@@ -153,11 +149,22 @@ const userSchema = new mongoose.Schema({
   firstName: { type: String, trim: true },
   lastName: { type: String, trim: true },
   profilePicture: { type: String },
+  saved: {
+    properties: [{
+      id: String,
+      title: String,
+      location: String,
+      price: Number,
+      bedrooms: Number,
+      bathrooms: Number,
+      sizeSqFt: String
+    }]
+  }
 }, { timestamps: true });
 
-// --- Models ---
 const Property = mongoose.models.Property || mongoose.model('Property', propertySchema);
 const Bid = mongoose.models.Bid || mongoose.model('Bid', bidSchema);
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 
-export { User, Property, Bid };
+export default User;
+export { Property, Bid };
