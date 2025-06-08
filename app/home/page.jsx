@@ -75,7 +75,7 @@ const page = () => {
       {
         openMenu &&
         <div className='w-full left-0 top-0 mt-20 h-screen z-10 absolute duration-200 transition-all bg-white/10 backdrop-blur-2xl space-y-4 px-10 py-10'>
-          <a href="/home" className='flex items-center gap-2 hover:text-[#38BDF9] duration-150'><Home />Home</a>
+          <a href="/home\" className='flex items-center gap-2 hover:text-[#38BDF9] duration-150'><Home />Home</a>
           <a href="/home" className='flex items-center gap-2 hover:text-[#38BDF9] duration-150'><Home /> Properties</a>
           <a href="/home" className='flex items-center gap-2 hover:text-[#38BDF9] duration-150'>{isLoggedIn ? <><LogOut />Logout</> : <><LogIn />Login</>}</a>
           {
