@@ -3,21 +3,22 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import { ArrowRight, DollarSign, HandshakeIcon, Home, LogIn, LogOut, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { generateProperties } from '@/lib/generateProperties'
 import images from "@/lib/img"
 import PropertyCard from '../components/PropertyCard'
 import Footer from '../components/Footer'
+
 const page = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const router = useRouter()
   const [openMenu, setOpenMenu] = useState(false)
-  const [properties, setproperties] = useState([])
-  const [featuredProperties, setfeaturedProperties] = useState([])
+  const [featuredProperties, setFeaturedProperties] = useState([])
   const [isVisible, setIsVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
   useEffect(() => {
     const token = localStorage.getItem("token")
     if (!token) {
@@ -25,14 +26,45 @@ const page = () => {
     } else {
       setIsLoggedIn(true)
     }
-    const setProps = async () => {
-      const properties = await generateProperties();
-      setproperties(properties);
-      const initialFeaturedProperties = properties.slice(0, 4); 
-      setfeaturedProperties(initialFeaturedProperties);
-    };
-    setProps();
+    
+    fetchFeaturedProperties();
   }, [])
+
+  const fetchFeaturedProperties = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/properties/all?limit=4');
+      if (response.ok) {
+        const data = await response.json();
+        setFeaturedProperties(data.properties || []);
+      } else {
+        console.error('Failed to fetch properties');
+      }
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const seedProperties = async () => {
+    try {
+      const response = await fetch('/api/properties/seed', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ count: 50 }),
+      });
+      
+      if (response.ok) {
+        fetchFeaturedProperties();
+      }
+    } catch (error) {
+      console.error('Error seeding properties:', error);
+    }
+  };
+
   return (
     <div
       className={`w-full px-10 md:px-16 lg:px-28 py-4 transition-opacity min-h-screen duration-500 ${
@@ -116,17 +148,57 @@ const page = () => {
       <div className='w-full my-10'>
         <div className='w-full flex items-center justify-between'>
           <h1 className='text-xl md:text-3xl font-semibold text-white'>Featured Properties</h1>
-          <a href="/properties" className='text-blue-300 cursor-pointer text-md md:text-xl'>View all</a>
+          <div className="flex gap-4">
+            {featuredProperties.length === 0 && (
+              <button 
+                onClick={seedProperties}
+                className='text-blue-300 cursor-pointer text-md md:text-xl hover:underline'
+              >
+                Load Sample Properties
+              </button>
+            )}
+            <a href="/properties" className='text-blue-300 cursor-pointer text-md md:text-xl'>View all</a>
+          </div>
         </div>
-        <div className='grid grid-cols-1 gap-6 md:gap-6 md:grid-cols-3 my-5 lg:grid-cols-4 place-items-center'>
-          {
-            properties && featuredProperties && featuredProperties.map((item, idx) => {
-              return (
-                <PropertyCard property={item} key={idx} image={images[idx % images.length]} />
-              )
-            })
-          }
-        </div>
+        
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+          </div>
+        ) : (
+          <div className='grid grid-cols-1 gap-6 md:gap-6 md:grid-cols-3 my-5 lg:grid-cols-4 place-items-center'>
+            {featuredProperties.length > 0 ? (
+              featuredProperties.map((item, idx) => {
+                const propertyForCard = {
+                  id: item._id,
+                  title: item.title,
+                  location: `${item.location.city}, ${item.location.state}`,
+                  price: item.price,
+                  bedrooms: item.bedrooms,
+                  bathrooms: item.bathrooms,
+                  sizeSqFt: item.sizeSqFt
+                };
+                return (
+                  <PropertyCard 
+                    property={propertyForCard} 
+                    key={item._id} 
+                    image={images[idx % images.length]} 
+                  />
+                );
+              })
+            ) : (
+              <div className="col-span-full text-center py-16">
+                <p className="text-gray-400 text-lg mb-4">No properties available yet.</p>
+                <button 
+                  onClick={seedProperties}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors"
+                >
+                  Load Sample Properties
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <section className="bg-[#14161A] my-10 p-12 rounded-xl text-center">
         <h2 className="text-3xl font-bold text-white mb-4">Ready to Find Your Dream Property?</h2>
@@ -134,10 +206,10 @@ const page = () => {
           Join PropertyBid today and start bidding on exclusive properties or list your own for auction.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button to="/register" className='bg-[#0084C7] text-white px-4 py-2 text-md rounded-lg cursor-pointer hover:opacity-85 duration-200'>
+          <button onClick={() => router.push("/login")} className='bg-[#0084C7] text-white px-4 py-2 text-md rounded-lg cursor-pointer hover:opacity-85 duration-200'>
             Sign Up Now
           </button>
-          <button to="/properties" className='bg-[#2D3748] text-white px-4 py-2 text-md rounded-lg cursor-pointer hover:opacity-85 duration-200'>
+          <button onClick={() => router.push("/properties")} className='bg-[#2D3748] text-white px-4 py-2 text-md rounded-lg cursor-pointer hover:opacity-85 duration-200'>
             Browse Properties
           </button>
         </div>

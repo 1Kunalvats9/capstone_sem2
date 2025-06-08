@@ -2,11 +2,10 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import { useRouter } from 'next/navigation'
-import { generateProperties } from '@/lib/generateProperties'
 import images from "@/lib/img"
 import PropertyCard from '../components/PropertyCard'
 import toast from 'react-hot-toast'
-import { Home, LogOut, Filter, Search } from 'lucide-react'
+import { Home, LogOut, Filter, Search, LogIn } from 'lucide-react'
 
 const PropertiesPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(true)
@@ -22,6 +21,12 @@ const PropertiesPage = () => {
   })
   const [showFilters, setShowFilters] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 12,
+    total: 0,
+    pages: 0
+  })
   const router = useRouter()
 
   useEffect(() => {
@@ -36,11 +41,32 @@ const PropertiesPage = () => {
     }
   }, [])
 
+  useEffect(() => {
+    fetchProperties()
+  }, [pagination.page, filters, searchQuery])
+
   const fetchProperties = async () => {
     try {
       setLoading(true)
-      const generatedProperties = await generateProperties(50)
-      setProperties(generatedProperties)
+      const queryParams = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        search: searchQuery,
+        ...Object.fromEntries(Object.entries(filters).filter(([_, value]) => value))
+      })
+
+      const response = await fetch(`/api/properties/all?${queryParams}`)
+      if (response.ok) {
+        const data = await response.json()
+        setProperties(data.properties || [])
+        setPagination(prev => ({
+          ...prev,
+          total: data.pagination.total,
+          pages: data.pagination.pages
+        }))
+      } else {
+        toast.error("Failed to fetch properties")
+      }
     } catch (error) {
       console.error("Error fetching properties:", error)
       toast.error("Failed to fetch properties")
@@ -49,24 +75,12 @@ const PropertiesPage = () => {
     }
   }
 
-  const filteredProperties = properties.filter(property => {
-    const matchesSearch = property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         property.location.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesType = !filters.propertyType || property.propertyType === filters.propertyType
-    const matchesMinPrice = !filters.minPrice || property.price >= parseInt(filters.minPrice)
-    const matchesMaxPrice = !filters.maxPrice || property.price <= parseInt(filters.maxPrice)
-    const matchesBedrooms = !filters.bedrooms || property.bedrooms >= parseInt(filters.bedrooms)
-    const matchesBathrooms = !filters.bathrooms || property.bathrooms >= parseInt(filters.bathrooms)
-
-    return matchesSearch && matchesType && matchesMinPrice && matchesMaxPrice && matchesBedrooms && matchesBathrooms
-  })
-
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({
       ...prev,
       [key]: value
     }))
+    setPagination(prev => ({ ...prev, page: 1 }))
   }
 
   const clearFilters = () => {
@@ -77,7 +91,35 @@ const PropertiesPage = () => {
       bedrooms: '',
       bathrooms: ''
     })
+    setPagination(prev => ({ ...prev, page: 1 }))
   }
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value)
+    setPagination(prev => ({ ...prev, page: 1 }))
+  }
+
+  const seedProperties = async () => {
+    try {
+      const response = await fetch('/api/properties/seed', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ count: 50 }),
+      });
+      
+      if (response.ok) {
+        toast.success("Sample properties loaded successfully!")
+        fetchProperties();
+      } else {
+        toast.error("Failed to load sample properties")
+      }
+    } catch (error) {
+      console.error('Error seeding properties:', error);
+      toast.error("Failed to load sample properties")
+    }
+  };
 
   return (
     <div className='w-full min-h-screen px-10 md:px-16 lg:px-28 py-4'>
@@ -101,7 +143,7 @@ const PropertiesPage = () => {
               placeholder='Search for properties by name or location....' 
               className='w-full border border-gray-500 rounded-lg outline-none placeholder:font-light placeholder-gray-400 px-10 py-3 bg-gray-900 text-white' 
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)} 
+              onChange={handleSearch} 
             />
           </div>
           <button
@@ -129,6 +171,7 @@ const PropertiesPage = () => {
                   <option value="Villa">Villa</option>
                   <option value="Condo">Condo</option>
                   <option value="Townhouse">Townhouse</option>
+                  <option value="Ranch">Ranch</option>
                 </select>
               </div>
 
@@ -203,21 +246,66 @@ const PropertiesPage = () => {
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
         </div>
       ) : (
-        <div className='w-full grid gap-6 grid-cols-1 my-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-          {filteredProperties.length > 0 ? (
-            filteredProperties.map((item, idx) => (
-              <PropertyCard 
-                property={item} 
-                key={idx} 
-                image={images[idx % images.length]} 
-              />
-            ))
+        <>
+          {properties.length > 0 ? (
+            <>
+              <div className='w-full grid gap-6 grid-cols-1 my-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+                {properties.map((item, idx) => {
+                  const propertyForCard = {
+                    id: item._id,
+                    title: item.title,
+                    location: `${item.location.city}, ${item.location.state}`,
+                    price: item.price,
+                    bedrooms: item.bedrooms,
+                    bathrooms: item.bathrooms,
+                    sizeSqFt: item.sizeSqFt
+                  };
+                  return (
+                    <PropertyCard 
+                      property={propertyForCard} 
+                      key={item._id} 
+                      image={images[idx % images.length]} 
+                    />
+                  );
+                })}
+              </div>
+
+              {pagination.pages > 1 && (
+                <div className="flex justify-center items-center gap-4 my-8">
+                  <button
+                    onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                    disabled={pagination.page === 1}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  
+                  <span className="text-white">
+                    Page {pagination.page} of {pagination.pages}
+                  </span>
+                  
+                  <button
+                    onClick={() => setPagination(prev => ({ ...prev, page: Math.min(pagination.pages, prev.page + 1) }))}
+                    disabled={pagination.page === pagination.pages}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="col-span-full text-center py-16">
-              <p className="text-gray-400 text-lg">No properties found matching your criteria.</p>
+              <p className="text-gray-400 text-lg mb-4">No properties found matching your criteria.</p>
+              <button 
+                onClick={seedProperties}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors"
+              >
+                Load Sample Properties
+              </button>
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   )

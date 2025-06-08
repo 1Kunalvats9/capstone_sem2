@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 const PropertyCard = ({ property, image, isSavedPage = false, setSelectedProperty = () => { } }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [saved, setsaved] = useState([]);
+  const [saved, setSaved] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -15,20 +15,10 @@ const PropertyCard = ({ property, image, isSavedPage = false, setSelectedPropert
       const email = localStorage.getItem("email");
       if (email) {
         try {
-          const response = await fetch(`/api/properties/get-property`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email }),
-          });
+          const response = await fetch(`/api/properties/saved?email=${email}`);
           if (response.ok) {
             const data = await response.json();
-            if (data.data) {
-              setsaved(data.data);
-            }
-          } else {
-            console.error('Failed to fetch saved properties');
+            setSaved(data.savedProperties || []);
           }
         } catch (error) {
           console.error('Error fetching saved properties:', error);
@@ -37,85 +27,60 @@ const PropertyCard = ({ property, image, isSavedPage = false, setSelectedPropert
     };
 
     fetchSavedProperties();
-  }, [property?.id]);
+  }, []);
 
-  const handleSaveClick = async () => {
+  const handleSaveClick = async (e) => {
+    e.stopPropagation();
     const email = localStorage.getItem("email");
     if (!email) {
       router.push('/login');
       return;
     }
-    const isCurrentlySaved = saved.some(savedProp => savedProp?.id === property?.id);
-    const fetchUrl = isCurrentlySaved ? '/api/properties/delete' : '/api/properties/save';
-    const method = 'POST';
-    const body = JSON.stringify({ email, property }); // Ensure 'property' prop has 'bathrooms' and 'bedrooms'
 
     try {
-      const response = await fetch(fetchUrl, {
-        method,
+      const response = await fetch('/api/properties/saved', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body,
+        body: JSON.stringify({ 
+          email, 
+          propertyId: property.id 
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
         toast.success(data.message);
+        
+        const isCurrentlySaved = saved.some(savedProp => savedProp._id === property.id);
         if (isCurrentlySaved) {
-          setsaved(prev => prev.filter(item => item.id !== property.id));
+          setSaved(prev => prev.filter(item => item._id !== property.id));
         } else {
-          setsaved(prev => [...prev, property]);
+          setSaved(prev => [...prev, { _id: property.id }]);
         }
       } else {
         const errorData = await response.json();
-        console.log(`Failed to ${isCurrentlySaved ? 'unsave' : 'save'} property:`, errorData.message);
-        toast.error(`Failed to ${isCurrentlySaved ? 'unsave' : 'save'} property`);
+        toast.error(errorData?.error || "Failed to save/unsave property");
       }
     } catch (error) {
-      console.log(`Error ${isCurrentlySaved ? 'unsaving' : 'saving'} property:`, error);
-      toast.error(`Error ${isCurrentlySaved ? 'unsaving' : 'saving'} property`);
+      console.error("Error saving/unsaving property:", error);
+      toast.error("Error saving/unsaving property");
     }
   };
 
-  const handleDeleteClick = async () => {
-    const email = localStorage.getItem("email");
-    if (!email) {
-      toast.error("Please log in to delete saved properties.");
-      return;
-    }
-    try {
-      const response = await fetch('/api/saved/delete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, property }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast.success("Property removed successfully");
-        setsaved(prev => prev.filter(item => item.id !== property.id));
-        if (isSavedPage) {
-          router.refresh();
-        }
-      } else {
-        const errorData = await response.json();
-        console.error('Failed to delete property:', errorData.message);
-        toast.error('Failed to delete property');
-      }
-    } catch (error) {
-      console.error('Error deleting property:', error);
-      toast.error('Error deleting property');
-    }
+  const handleCardClick = () => {
+    router.push(`/properties/${property.id}`);
   };
+
+  const isPropertySaved = saved.some(savedProp => savedProp._id === property.id);
 
   return (
     <div
-      className="property-card cursor-pointer  bg-white/10 backdrop-blur-2xl rounded-lg overflow-hidden shadow-property hover:shadow-property-hover transition-shadow duration-300 relative"
+      className="property-card cursor-pointer bg-white/10 backdrop-blur-2xl rounded-lg overflow-hidden shadow-property hover:shadow-property-hover transition-shadow duration-300 relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
     >
       <div className="block">
         <div className="relative">
@@ -127,27 +92,20 @@ const PropertyCard = ({ property, image, isSavedPage = false, setSelectedPropert
           />
           <div className="absolute top-0 left-0 w-full h-full bg-black opacity-20 transition-opacity duration-300" style={{ opacity: isHovered ? 0.3 : 0 }}></div>
           <button
-            onClick={property && handleSaveClick}
-            className={`absolute top-3 right-3 p-2 rounded-full transition-colors duration-300 z-10 ${saved.some(savedProp => savedProp?.id === property?.id)
-              ? 'bg-red-500 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
+            onClick={handleSaveClick}
+            className={`absolute top-3 right-3 p-2 rounded-full transition-colors duration-300 z-10 ${
+              isPropertySaved
+                ? 'bg-red-500 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
           >
             <Heart
               size={18}
               className='cursor-pointer hover:scale-115 duration-200'
-              fill={saved.some(savedProp => savedProp?.id === property?.id) ? 'white' : 'none'}
-              stroke={saved.some(savedProp => savedProp?.id === property?.id) ? 'none' : 'currentColor'}
+              fill={isPropertySaved ? 'white' : 'none'}
+              stroke={isPropertySaved ? 'none' : 'currentColor'}
             />
           </button>
-          {isSavedPage && (
-            <button
-              onClick={handleDeleteClick}
-              className="absolute top-3 left-3 p-2 rounded-full bg-white text-red-500 hover:bg-red-100 transition-colors duration-300 z-10"
-            >
-              <Trash2 size={18} className='cursor-pointer hover:scale-115 duration-200' />
-            </button>
-          )}
         </div>
 
         <div className="p-4 relative">
@@ -177,15 +135,15 @@ const PropertyCard = ({ property, image, isSavedPage = false, setSelectedPropert
               <Maximize size={16} className="mr-1" />
               <span>{property?.sizeSqFt} sqft</span>
             </div>
-            <div className="absolute top-4 right-4" onClick={()=>{
-              router.push(`/properties/${property.id}`)
-            }}>
-              <span className="text-blue-400 font-semibold">Bid on it</span>
-            </div>
+          </div>
+          
+          <div className="absolute top-4 right-4">
+            <span className="text-blue-400 font-semibold">Bid on it</span>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
 export default PropertyCard;

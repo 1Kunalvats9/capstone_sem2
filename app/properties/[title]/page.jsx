@@ -33,33 +33,20 @@ const PropertyDetailPage = () => {
       if (title && email) {
         setLoading(true);
         try {
-          const res = await fetch(`/api/properties/get-property`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email }),
-          });
+          const res = await fetch(`/api/properties/${title}`);
           
           if (!res.ok) {
-            toast.error("Could not fetch properties");
+            toast.error("Property not found");
             router.push('/properties');
             return;
           }
           
           const data = await res.json();
-          const foundProperty = data?.data?.find((prop) => prop.id === title);
-          
-          if (foundProperty) {
-            setProperty(foundProperty);
-            fetchBids(foundProperty.id);
-          } else {
-            toast.error("Property not found");
-            router.push('/properties');
-          }
+          setProperty(data.property);
+          fetchBids(title);
         } catch (error) {
-          console.error("Error fetching properties:", error);
-          toast.error("Failed to fetch properties");
+          console.error("Error fetching property:", error);
+          toast.error("Failed to fetch property details");
           router.push('/properties');
         } finally {
           setLoading(false);
@@ -117,7 +104,7 @@ const PropertyDetailPage = () => {
       return;
     }
 
-    const currentHighest = bids.length > 0 ? Math.max(...bids.map(bid => bid.bidAmount)) : (property?.startingBid || property?.price || 0);
+    const currentHighest = property?.currentHighestBid || property?.startingBid || property?.price || 0;
     
     if (parseFloat(bidAmount) <= currentHighest) {
       toast.error(`Bid must be higher than current highest bid of $${currentHighest.toLocaleString()}`);
@@ -126,7 +113,7 @@ const PropertyDetailPage = () => {
 
     setBidLoading(true);
     try {
-      const response = await fetch(`/api/properties/${property.id}/bids`, {
+      const response = await fetch(`/api/properties/${property._id}/bids`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,9 +125,14 @@ const PropertyDetailPage = () => {
       });
 
       if (response.ok) {
+        const data = await response.json();
         toast.success("Bid placed successfully!");
         setBidAmount('');
-        fetchBids(property.id);
+        setProperty(prev => ({
+          ...prev,
+          currentHighestBid: data.newHighestBid
+        }));
+        fetchBids(property._id);
       } else {
         const errorData = await response.json();
         toast.error(errorData?.error || "Failed to place bid.");
@@ -169,7 +161,7 @@ const PropertyDetailPage = () => {
     );
   }
 
-  const currentHighestBid = bids.length > 0 ? Math.max(...bids.map(bid => bid.bidAmount)) : (property?.startingBid || property?.price || 0);
+  const currentHighestBid = property?.currentHighestBid || property?.startingBid || property?.price || 0;
   const isBiddingActive = property?.isBiddingActive && (!property?.biddingEndsAt || new Date() < new Date(property.biddingEndsAt));
 
   return (
@@ -196,7 +188,7 @@ const PropertyDetailPage = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="flex items-center text-gray-300">
                     <MapPin size={16} className="mr-2 text-blue-300" />
-                    <span className="text-sm">{property.location}</span>
+                    <span className="text-sm">{property.location.city}, {property.location.state}</span>
                   </div>
                   <div className="flex items-center text-gray-300">
                     <Bed size={16} className="mr-2 text-blue-300" />
@@ -220,6 +212,22 @@ const PropertyDetailPage = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-blue-400 mb-2">Description</h3>
                     <p className="text-gray-300 leading-relaxed">{property.description}</p>
+                  </div>
+                )}
+
+                {property.amenities && property.amenities.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold text-blue-400 mb-2">Amenities</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {property.amenities.map((amenity, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-gray-700 rounded-full text-sm text-gray-300"
+                        >
+                          {amenity}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -282,7 +290,7 @@ const PropertyDetailPage = () => {
                       <div key={bid._id || index} className="flex justify-between items-center p-3 bg-gray-800 rounded-md">
                         <div>
                           <div className="text-sm text-gray-400">
-                            {bid.bidder?.userName || bid.userEmail || 'Anonymous'}
+                            {bid.bidder?.userName || 'Anonymous'}
                           </div>
                           <div className="text-xs text-gray-500 flex items-center">
                             <Calendar size={12} className="mr-1" />
