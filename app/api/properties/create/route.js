@@ -34,6 +34,7 @@ export async function POST(req) {
 
     const newProperty = new Property({
       owner: user._id,
+      propertyNumber: `PROP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
       title,
       description,
       propertyType,

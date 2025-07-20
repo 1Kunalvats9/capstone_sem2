@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import Image from 'next/image';
 import { MapPin, Bed, Bath, Maximize, Clock, DollarSign, User, Calendar } from 'lucide-react';
 import images from '@/lib/img';
+import { getSocketClient } from '@/lib/socketClient';
 
 const PropertyDetailPage = () => {
   const params = useParams();
@@ -17,6 +18,8 @@ const PropertyDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [bidLoading, setBidLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState('');
+  const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState(0);
 
   useEffect(() => {
     const storedEmail = localStorage.getItem("email");
@@ -27,6 +30,35 @@ const PropertyDetailPage = () => {
     setEmail(storedEmail);
   }, [router]);
 
+  useEffect(() => {
+    if (property?._id) {
+      const socketClient = getSocketClient();
+      setSocket(socketClient);
+      
+      socketClient.emit('join-property', property._id);
+      
+      socketClient.on('new-bid', (data) => {
+        if (data.propertyId === property._id) {
+          setProperty(prev => ({
+            ...prev,
+            currentHighestBid: data.newHighestBid
+          }));
+          setBids(prev => [data.bid, ...prev]);
+          toast.success(`New bid placed: $${data.newHighestBid.toLocaleString()}`);
+        }
+      });
+      
+      socketClient.on('user-count', (count) => {
+        setOnlineUsers(count);
+      });
+      
+      return () => {
+        socketClient.emit('leave-property', property._id);
+        socketClient.off('new-bid');
+        socketClient.off('user-count');
+      };
+    }
+  }, [property?._id]);
   useEffect(() => {
     const { title } = params;
     const fetchPropertyDetails = async () => {
@@ -165,7 +197,7 @@ const PropertyDetailPage = () => {
   const isBiddingActive = property?.isBiddingActive && (!property?.biddingEndsAt || new Date() < new Date(property.biddingEndsAt));
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <div className="px-10 md:px-16 lg:px-28 py-4">
         <Navbar isLoggedIn={true} />
         
@@ -173,33 +205,47 @@ const PropertyDetailPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6">
-                <Image 
-                  src={images[Math.floor(Math.random() * images.length)]} 
-                  alt={property.title} 
-                  layout="fill" 
-                  objectFit="cover" 
-                  priority 
-                />
+                {property.images && property.images.length > 0 ? (
+                  <img 
+                    src={property.images[0]} 
+                    alt={property.title} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <img 
+                    src={images[Math.floor(Math.random() * images.length)]} 
+                    alt={property.title} 
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                <div className="absolute top-4 left-4 glass-effect px-3 py-1 rounded-full">
+                  <span className="text-white text-sm font-medium">#{property.propertyNumber}</span>
+                </div>
+                {onlineUsers > 0 && (
+                  <div className="absolute top-4 right-4 glass-effect px-3 py-1 rounded-full">
+                    <span className="text-green-400 text-sm font-medium">{onlineUsers} viewing</span>
+                  </div>
+                )}
               </div>
 
-              <div className="bg-gray-900 rounded-lg p-6 mb-6">
-                <h1 className="text-3xl font-bold text-blue-400 mb-4">{property.title}</h1>
+              <div className="glass-effect rounded-xl p-6 mb-6">
+                <h1 className="text-3xl font-bold gradient-text mb-4">{property.title}</h1>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="flex items-center text-gray-300">
-                    <MapPin size={16} className="mr-2 text-blue-300" />
+                  <div className="flex items-center text-slate-300">
+                    <MapPin size={16} className="mr-2 text-blue-400" />
                     <span className="text-sm">{property.location.city}, {property.location.state}</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
-                    <Bed size={16} className="mr-2 text-blue-300" />
+                  <div className="flex items-center text-slate-300">
+                    <Bed size={16} className="mr-2 text-blue-400" />
                     <span className="text-sm">{property.bedrooms} Bedrooms</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
-                    <Bath size={16} className="mr-2 text-blue-300" />
+                  <div className="flex items-center text-slate-300">
+                    <Bath size={16} className="mr-2 text-blue-400" />
                     <span className="text-sm">{property.bathrooms} Bathrooms</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
-                    <Maximize size={16} className="mr-2 text-blue-300" />
+                  <div className="flex items-center text-slate-300">
+                    <Maximize size={16} className="mr-2 text-blue-400" />
                     <span className="text-sm">{property.sizeSqFt} sqft</span>
                   </div>
                 </div>
@@ -210,19 +256,19 @@ const PropertyDetailPage = () => {
 
                 {property.description && (
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-400 mb-2">Description</h3>
-                    <p className="text-gray-300 leading-relaxed">{property.description}</p>
+                    <h3 className="text-lg font-semibold gradient-text mb-2">Description</h3>
+                    <p className="text-slate-300 leading-relaxed font-light">{property.description}</p>
                   </div>
                 )}
 
                 {property.amenities && property.amenities.length > 0 && (
                   <div className="mt-6">
-                    <h3 className="text-lg font-semibold text-blue-400 mb-2">Amenities</h3>
+                    <h3 className="text-lg font-semibold gradient-text mb-2">Amenities</h3>
                     <div className="flex flex-wrap gap-2">
                       {property.amenities.map((amenity, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1 bg-gray-700 rounded-full text-sm text-gray-300"
+                          className="px-3 py-1 glass-effect rounded-full text-sm text-slate-300"
                         >
                           {amenity}
                         </span>
@@ -231,18 +277,36 @@ const PropertyDetailPage = () => {
                   </div>
                 )}
               </div>
+
+              {/* Image Gallery */}
+              {property.images && property.images.length > 1 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold gradient-text mb-4">Property Gallery</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {property.images.slice(1, 7).map((imageUrl, index) => (
+                      <div key={index} className="relative h-32 rounded-lg overflow-hidden">
+                        <img 
+                          src={imageUrl} 
+                          alt={`${property.title} - Image ${index + 2}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="lg:col-span-1">
               {isBiddingActive && (
-                <div className="bg-gray-900 rounded-lg p-6 mb-6">
-                  <h2 className="text-xl font-semibold text-blue-400 mb-4 flex items-center">
+                <div className="bid-card rounded-xl p-6 mb-6">
+                  <h2 className="text-xl font-semibold gradient-text mb-4 flex items-center">
                     <DollarSign size={20} className="mr-2" />
                     Live Bidding
                   </h2>
                   
                   {property.biddingEndsAt && (
-                    <div className="mb-4 p-3 bg-red-900/30 rounded-lg">
+                    <div className="mb-4 p-3 countdown-timer rounded-lg">
                       <div className="flex items-center text-red-400 mb-1">
                         <Clock size={16} className="mr-2" />
                         <span className="text-sm font-medium">Time Remaining</span>
@@ -251,7 +315,7 @@ const PropertyDetailPage = () => {
                     </div>
                   )}
 
-                  <div className="mb-4 p-3 bg-green-900/30 rounded-lg">
+                  <div className="mb-4 p-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg border border-green-500/30">
                     <div className="text-sm text-green-400 mb-1">Current Highest Bid</div>
                     <div className="text-2xl font-bold text-white">${currentHighestBid.toLocaleString()}</div>
                   </div>
@@ -264,12 +328,12 @@ const PropertyDetailPage = () => {
                         value={bidAmount}
                         onChange={(e) => setBidAmount(e.target.value)}
                         min={currentHighestBid + 1}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                       <button
                         onClick={handlePlaceBid}
                         disabled={bidLoading || !bidAmount}
-                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-md transition-colors"
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 hover:shadow-lg"
                       >
                         {bidLoading ? "Placing Bid..." : "Place Bid"}
                       </button>
@@ -278,8 +342,8 @@ const PropertyDetailPage = () => {
                 </div>
               )}
 
-              <div className="bg-gray-900 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-blue-400 mb-4 flex items-center">
+              <div className="glass-effect rounded-xl p-6">
+                <h3 className="text-lg font-semibold gradient-text mb-4 flex items-center">
                   <User size={18} className="mr-2" />
                   Recent Bids ({bids.length})
                 </h3>
@@ -287,24 +351,24 @@ const PropertyDetailPage = () => {
                 {bids.length > 0 ? (
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {bids.slice(0, 10).map((bid, index) => (
-                      <div key={bid._id || index} className="flex justify-between items-center p-3 bg-gray-800 rounded-md">
+                      <div key={bid._id || index} className="flex justify-between items-center p-3 glass-effect rounded-lg border border-slate-700">
                         <div>
-                          <div className="text-sm text-gray-400">
+                          <div className="text-sm text-slate-300 font-medium">
                             {bid.bidder?.userName || 'Anonymous'}
                           </div>
-                          <div className="text-xs text-gray-500 flex items-center">
+                          <div className="text-xs text-slate-400 flex items-center">
                             <Calendar size={12} className="mr-1" />
                             {new Date(bid.bidTime || bid.createdAt).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className="text-green-400 font-semibold">
+                        <div className="text-green-400 font-bold">
                           ${bid.bidAmount.toLocaleString()}
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-400 text-center py-4">No bids yet. Be the first to bid!</p>
+                  <p className="text-slate-400 text-center py-4 font-light">No bids yet. Be the first to bid!</p>
                 )}
               </div>
             </div>

@@ -4,7 +4,16 @@ import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
-    await connectToMongoDb();
+    try {
+      await connectToMongoDb();
+    } catch (dbError) {
+      console.error("Database connection failed:", dbError);
+      return NextResponse.json({ 
+        error: "Database connection failed", 
+        properties: [],
+        pagination: { page: 1, limit: 12, total: 0, pages: 0 }
+      }, { status: 500 });
+    }
     
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page')) || 1;
