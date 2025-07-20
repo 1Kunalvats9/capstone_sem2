@@ -205,13 +205,19 @@ const PropertyDetailPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6">
-                <Image 
-                  src={images[Math.floor(Math.random() * images.length)]} 
-                  alt={property.title} 
-                  layout="fill" 
-                  objectFit="cover" 
-                  priority 
-                />
+                {property.images && property.images.length > 0 ? (
+                  <img 
+                    src={property.images[0]} 
+                    alt={property.title} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <img 
+                    src={images[Math.floor(Math.random() * images.length)]} 
+                    alt={property.title} 
+                    className="w-full h-full object-cover"
+                  />
+                )}
                 <div className="absolute top-4 left-4 glass-effect px-3 py-1 rounded-full">
                   <span className="text-white text-sm font-medium">#{property.propertyNumber}</span>
                 </div>
@@ -271,6 +277,24 @@ const PropertyDetailPage = () => {
                   </div>
                 )}
               </div>
+
+              {/* Image Gallery */}
+              {property.images && property.images.length > 1 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold gradient-text mb-4">Property Gallery</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {property.images.slice(1, 7).map((imageUrl, index) => (
+                      <div key={index} className="relative h-32 rounded-lg overflow-hidden">
+                        <img 
+                          src={imageUrl} 
+                          alt={`${property.title} - Image ${index + 2}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="lg:col-span-1">

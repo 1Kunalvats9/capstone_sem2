@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 const AddPropertyPage = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -32,6 +33,7 @@ const AddPropertyPage = () => {
   });
 
   const [newAmenity, setNewAmenity] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   useEffect(() => {
     const userEmail = localStorage.getItem("email");
@@ -79,11 +81,64 @@ const AddPropertyPage = () => {
     }));
   };
 
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length + formData.images.length > 10) {
+      toast.error('Maximum 10 images allowed');
+      return;
+    }
+    setSelectedFiles(files);
+  };
+
+  const uploadImages = async () => {
+    if (selectedFiles.length === 0) return [];
+
+    setUploading(true);
+    const uploadedImages = [];
+
+    try {
+      for (const file of selectedFiles) {
+        const formDataUpload = new FormData();
+        formDataUpload.append('file', file);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formDataUpload,
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          uploadedImages.push(result.url);
+        } else {
+          throw new Error('Failed to upload image');
+        }
+      }
+      return uploadedImages;
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error('Failed to upload some images');
+      return [];
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // Upload images first
+      const uploadedImageUrls = await uploadImages();
+      const allImages = [...formData.images, ...uploadedImageUrls];
+
       const response = await fetch('/api/properties/create', {
         method: 'POST',
         headers: {
@@ -92,6 +147,7 @@ const AddPropertyPage = () => {
         body: JSON.stringify({
           email,
           ...formData,
+          images: allImages,
           price: parseFloat(formData.price),
           bedrooms: parseInt(formData.bedrooms),
           bathrooms: parseInt(formData.bathrooms),
@@ -101,7 +157,9 @@ const AddPropertyPage = () => {
       });
 
       if (response.ok) {
+        const data = await response.json();
         toast.success("Property added successfully!");
+        setSelectedFiles([]);
         router.push('/profile');
       } else {
         const errorData = await response.json();
@@ -309,6 +367,81 @@ const AddPropertyPage = () => {
             </div>
 
             <div className="border-t border-slate-700 pt-6">
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2 text-slate-300">Property Images</label>
+                
+                <div className="mb-4">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <label
+                    htmlFor="image-upload"
+                    className="flex items-center justify-center w-full h-32 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer hover:border-slate-500 transition-colors"
+                  >
+                    <div className="text-center">
+                      <Upload className="mx-auto h-8 w-8 text-slate-400 mb-2" />
+                      <p className="text-slate-400">Click to upload images</p>
+                      <p className="text-xs text-slate-500">PNG, JPG up to 10 images</p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Preview selected files */}
+                {selectedFiles.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-sm text-slate-300 mb-2">Selected files ({selectedFiles.length}):</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {selectedFiles.map((file, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Preview ${index}`}
+                            className="w-full h-20 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== index))}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Display uploaded images */}
+                {formData.images.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-sm text-slate-300 mb-2">Uploaded images ({formData.images.length}):</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {formData.images.map((imageUrl, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={imageUrl}
+                            alt={`Uploaded ${index}`}
+                            className="w-full h-20 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex items-center gap-2 mb-4">
                 <input
                   type="checkbox"
@@ -358,10 +491,10 @@ const AddPropertyPage = () => {
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || uploading}
                 className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-300 hover:shadow-lg"
               >
-                {loading ? "Adding..." : "Add Property"}
+                {uploading ? "Uploading Images..." : loading ? "Adding..." : "Add Property"}
               </button>
             </div>
           </form>

@@ -162,11 +162,19 @@ const page = () => {
             {biddingProperties.map((property, idx) => (
               <div key={property._id} className="bid-card rounded-xl p-6 hover:scale-105 transition-transform duration-300">
                 <div className="relative h-48 rounded-lg overflow-hidden mb-4">
-                  <img 
-                    src={images[idx % images.length]} 
-                    alt={property.title}
-                    className="w-full h-full object-cover"
-                  />
+                  {property.images && property.images.length > 0 ? (
+                    <img 
+                      src={property.images[0]} 
+                      alt={property.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img 
+                      src={images[idx % images.length]} 
+                      alt={property.title}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                   <div className="absolute top-3 right-3 countdown-timer px-3 py-1 rounded-full text-white text-sm font-medium">
                     <Clock size={14} className="inline mr-1" />
                     Live
@@ -216,11 +224,19 @@ const page = () => {
             {upcomingBids.map((property, idx) => (
               <div key={property._id} className="glass-effect rounded-xl p-4 hover:bg-white/10 transition-all duration-300">
                 <div className="relative h-32 rounded-lg overflow-hidden mb-3">
-                  <img 
-                    src={images[idx % images.length]} 
-                    alt={property.title}
-                    className="w-full h-full object-cover"
-                  />
+                  {property.images && property.images.length > 0 ? (
+                    <img 
+                      src={property.images[0]} 
+                      alt={property.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img 
+                      src={images[idx % images.length]} 
+                      alt={property.title}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                   <div className="absolute top-2 right-2 bg-yellow-500 px-2 py-1 rounded-full text-black text-xs font-medium">
                     Soon
                   </div>
@@ -308,7 +324,8 @@ const page = () => {
                   price: item.price,
                   bedrooms: item.bedrooms,
                   bathrooms: item.bathrooms,
-                  sizeSqFt: item.sizeSqFt
+                  sizeSqFt: item.sizeSqFt,
+                  images: item.images
                 };
                 return (
                   <PropertyCard 

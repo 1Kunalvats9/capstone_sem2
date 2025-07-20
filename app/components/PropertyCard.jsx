@@ -84,12 +84,21 @@ const PropertyCard = ({ property, image, isSavedPage = false, setSelectedPropert
     >
       <div className="block">
         <div className="relative">
-          <Image
-            src={image}
-            alt={property?.title}
-            className="w-full h-52 object-cover transition-transform duration-300"
-            style={{ transform: isHovered ? 'scale-105' : 'scale-100' }}
-          />
+          {property?.images && property.images.length > 0 ? (
+            <img
+              src={property.images[0]}
+              alt={property?.title}
+              className="w-full h-52 object-cover transition-transform duration-300"
+              style={{ transform: isHovered ? 'scale-105' : 'scale-100' }}
+            />
+          ) : (
+            <img
+              src={image}
+              alt={property?.title}
+              className="w-full h-52 object-cover transition-transform duration-300"
+              style={{ transform: isHovered ? 'scale-105' : 'scale-100' }}
+            />
+          )}
           <div className="absolute top-0 left-0 w-full h-full bg-black opacity-20 transition-opacity duration-300" style={{ opacity: isHovered ? 0.3 : 0 }}></div>
           <button
             onClick={handleSaveClick}

@@ -258,7 +258,8 @@ const PropertiesPage = () => {
                     price: item.price,
                     bedrooms: item.bedrooms,
                     bathrooms: item.bathrooms,
-                    sizeSqFt: item.sizeSqFt
+                    sizeSqFt: item.sizeSqFt,
+                    images: item.images
                   };
                   return (
                     <PropertyCard 

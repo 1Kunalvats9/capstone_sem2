@@ -199,11 +199,19 @@ const ProfilePage = () => {
                                             {userProperties.map((property, index) => (
                                                 <div key={property._id} className="glass-effect rounded-xl overflow-hidden border border-slate-700 hover:border-slate-600 transition-colors">
                                                     <div className="relative h-48">
-                                                        <img
-                                                            src={images[index % images.length]}
-                                                            alt={property.title}
-                                                            className="w-full h-full object-cover"
-                                                        />
+                                                        {property.images && property.images.length > 0 ? (
+                                                            <img
+                                                                src={property.images[0]}
+                                                                alt={property.title}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <img
+                                                                src={images[index % images.length]}
+                                                                alt={property.title}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        )}
                                                         <div className="absolute top-2 right-2">
                                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                                                 property.status === 'Available' ? 'bg-green-600' :
