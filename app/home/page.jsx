@@ -348,58 +348,58 @@ const page = () => {
       </section>
     </div>
   )
+
+  // Countdown Timer Component
+  const CountdownTimer = ({ endTime }) => {
+    const [timeLeft, setTimeLeft] = useState('');
+
+    useEffect(() => {
+      const timer = setInterval(() => {
+        const now = new Date().getTime();
+        const end = new Date(endTime).getTime();
+        const distance = end - now;
+
+        if (distance > 0) {
+          const hours = Math.floor(distance / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          setTimeLeft(`${hours}h ${minutes}m`);
+        } else {
+          setTimeLeft('Ended');
+          clearInterval(timer);
+        }
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }, [endTime]);
+
+    return <p className="text-red-400 font-medium text-sm">{timeLeft}</p>;
+  };
+
+  // Countdown to Start Component
+  const CountdownToStart = ({ startTime }) => {
+    const [timeLeft, setTimeLeft] = useState('');
+
+    useEffect(() => {
+      const timer = setInterval(() => {
+        const now = new Date().getTime();
+        const start = new Date(startTime).getTime() - (24 * 60 * 60 * 1000); // 24 hours before end
+        const distance = start - now;
+
+        if (distance > 0) {
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          setTimeLeft(`${days}d ${hours}h`);
+        } else {
+          setTimeLeft('Started');
+          clearInterval(timer);
+        }
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }, [startTime]);
+
+    return timeLeft;
+  };
 }
-
-// Countdown Timer Component
-const CountdownTimer = ({ endTime }) => {
-  const [timeLeft, setTimeLeft] = useState('');
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const end = new Date(endTime).getTime();
-      const distance = end - now;
-
-      if (distance > 0) {
-        const hours = Math.floor(distance / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        setTimeLeft(`${hours}h ${minutes}m`);
-      } else {
-        setTimeLeft('Ended');
-        clearInterval(timer);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [endTime]);
-
-  return <p className="text-red-400 font-medium text-sm">{timeLeft}</p>;
-};
-
-// Countdown to Start Component
-const CountdownToStart = ({ startTime }) => {
-  const [timeLeft, setTimeLeft] = useState('');
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const start = new Date(startTime).getTime() - (24 * 60 * 60 * 1000); // 24 hours before end
-      const distance = start - now;
-
-      if (distance > 0) {
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        setTimeLeft(`${days}d ${hours}h`);
-      } else {
-        setTimeLeft('Started');
-        clearInterval(timer);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [startTime]);
-
-  return timeLeft;
-};
 
 export default page
