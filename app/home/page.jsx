@@ -40,8 +40,8 @@ const page = () => {
         fetch('/api/properties/all?limit=20')
       ]);
       
-      if (response.ok) {
-        const data = await response.json();
+      if (featuredRes.ok) {
+        const data = await featuredRes.json();
         setFeaturedProperties(data.properties || []);
       }
       
@@ -103,7 +103,7 @@ const page = () => {
       {
         openMenu &&
         <div className='w-full left-0 top-0 mt-20 h-screen z-10 absolute duration-200 transition-all bg-white/10 backdrop-blur-2xl space-y-4 px-10 py-10'>
-          <a href="/home\" className='flex items-center gap-2 hover:text-[#38BDF9] duration-150'><Home />Home</a>
+          <a href="/home" className='flex items-center gap-2 hover:text-[#38BDF9] duration-150'><Home />Home</a>
           <a href="/home" className='flex items-center gap-2 hover:text-[#38BDF9] duration-150'><Home /> Properties</a>
           <a href="/home" className='flex items-center gap-2 hover:text-[#38BDF9] duration-150'>{isLoggedIn ? <><LogOut />Logout</> : <><LogIn />Login</>}</a>
           {
@@ -362,22 +362,30 @@ const CountdownTimer = ({ endTime }) => {
 
       if (distance > 0) {
         const hours = Math.floor(distance / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        setTimeLeft(`${hours}h ${minutes}m`);
+      } else {
+        setTimeLeft('Ended');
+        clearInterval(timer);
+      }
+    }, 1000);
+
     return () => clearInterval(timer);
   }, [endTime]);
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
   return <p className="text-red-400 font-medium text-sm">{timeLeft}</p>;
 };
-        setTimeLeft(`${hours}h ${minutes}m`);
+
 // Countdown to Start Component
 const CountdownToStart = ({ startTime }) => {
   const [timeLeft, setTimeLeft] = useState('');
-      } else {
+
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date().getTime();
       const start = new Date(startTime).getTime() - (24 * 60 * 60 * 1000); // 24 hours before end
       const distance = start - now;
-        setTimeLeft('Ended');
+
       if (distance > 0) {
         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -387,11 +395,11 @@ const CountdownToStart = ({ startTime }) => {
         clearInterval(timer);
       }
     }, 1000);
-        clearInterval(timer);
+
     return () => clearInterval(timer);
   }, [startTime]);
-      }
+
   return timeLeft;
 };
-    }, 1000);
+
 export default page
