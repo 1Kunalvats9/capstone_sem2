@@ -6,6 +6,11 @@ const propertySchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  propertyNumber: {
+    type: String,
+    unique: true,
+    required: true,
+  },
   title: {
     type: String,
     required: true,

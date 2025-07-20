@@ -116,34 +116,34 @@ const AddPropertyPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <div className="px-10 md:px-16 lg:px-28 py-4">
         <Navbar />
         
         <div className="max-w-4xl mx-auto py-10">
-          <h1 className="text-3xl font-bold mb-8 text-center">Add New Property</h1>
+          <h1 className="text-3xl font-bold gradient-text mb-8 text-center">Add New Property</h1>
           
-          <form onSubmit={handleSubmit} className="space-y-6 bg-gray-900 p-8 rounded-lg">
+          <form onSubmit={handleSubmit} className="space-y-6 glass-effect p-8 rounded-xl border border-slate-700">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Property Title</label>
+                <label className="block text-sm font-medium mb-2 text-slate-300">Property Title</label>
                 <input
                   type="text"
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Property Type</label>
+                <label className="block text-sm font-medium mb-2 text-slate-300">Property Type</label>
                 <select
                   name="propertyType"
                   value={formData.propertyType}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 >
                   <option value="House">House</option>
                   <option value="Apartment">Apartment</option>
@@ -158,70 +158,70 @@ const AddPropertyPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Description</label>
+              <label className="block text-sm font-medium mb-2 text-slate-300">Description</label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Address</label>
+                <label className="block text-sm font-medium mb-2 text-slate-300">Address</label>
                 <input
                   type="text"
                   name="location.address"
                   value={formData.location.address}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">City</label>
+                <label className="block text-sm font-medium mb-2 text-slate-300">City</label>
                 <input
                   type="text"
                   name="location.city"
                   value={formData.location.city}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">State</label>
+                <label className="block text-sm font-medium mb-2 text-slate-300">State</label>
                 <input
                   type="text"
                   name="location.state"
                   value={formData.location.state}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">ZIP Code</label>
+                <label className="block text-sm font-medium mb-2 text-slate-300">ZIP Code</label>
                 <input
                   type="text"
                   name="location.zipCode"
                   value={formData.location.zipCode}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Price ($)</label>
+                <label className="block text-sm font-medium mb-2 text-slate-300">Price ($)</label>
                 <input
                   type="number"
                   name="price"
@@ -229,12 +229,12 @@ const AddPropertyPage = () => {
                   onChange={handleInputChange}
                   required
                   min="0"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Bedrooms</label>
+                <label className="block text-sm font-medium mb-2 text-slate-300">Bedrooms</label>
                 <input
                   type="number"
                   name="bedrooms"
@@ -242,12 +242,12 @@ const AddPropertyPage = () => {
                   onChange={handleInputChange}
                   required
                   min="0"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Bathrooms</label>
+                <label className="block text-sm font-medium mb-2 text-slate-300">Bathrooms</label>
                 <input
                   type="number"
                   name="bathrooms"
@@ -255,12 +255,12 @@ const AddPropertyPage = () => {
                   onChange={handleInputChange}
                   required
                   min="0"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Size (sq ft)</label>
+                <label className="block text-sm font-medium mb-2 text-slate-300">Size (sq ft)</label>
                 <input
                   type="number"
                   name="sizeSqFt"
@@ -268,25 +268,25 @@ const AddPropertyPage = () => {
                   onChange={handleInputChange}
                   required
                   min="0"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Amenities</label>
+              <label className="block text-sm font-medium mb-2 text-slate-300">Amenities</label>
               <div className="flex gap-2 mb-2">
                 <input
                   type="text"
                   value={newAmenity}
                   onChange={(e) => setNewAmenity(e.target.value)}
                   placeholder="Add amenity"
-                  className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 />
                 <button
                   type="button"
                   onClick={addAmenity}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
                 >
                   Add
                 </button>
@@ -295,12 +295,12 @@ const AddPropertyPage = () => {
                 {formData.amenities.map((amenity, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-gray-700 rounded-full text-sm"
+                    className="inline-flex items-center gap-1 px-3 py-1 glass-effect rounded-full text-sm border border-slate-600"
                   >
                     {amenity}
                     <X
                       size={14}
-                      className="cursor-pointer hover:text-red-400"
+                      className="cursor-pointer hover:text-red-400 transition-colors"
                       onClick={() => removeAmenity(amenity)}
                     />
                   </span>
@@ -308,40 +308,40 @@ const AddPropertyPage = () => {
               </div>
             </div>
 
-            <div className="border-t border-gray-700 pt-6">
+            <div className="border-t border-slate-700 pt-6">
               <div className="flex items-center gap-2 mb-4">
                 <input
                   type="checkbox"
                   name="isBiddingActive"
                   checked={formData.isBiddingActive}
                   onChange={handleInputChange}
-                  className="w-4 h-4"
+                  className="w-4 h-4 text-blue-600"
                 />
-                <label className="text-sm font-medium">Enable Bidding</label>
+                <label className="text-sm font-medium text-slate-300">Enable Bidding</label>
               </div>
 
               {formData.isBiddingActive && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Starting Bid ($)</label>
+                    <label className="block text-sm font-medium mb-2 text-slate-300">Starting Bid ($)</label>
                     <input
                       type="number"
                       name="startingBid"
                       value={formData.startingBid}
                       onChange={handleInputChange}
                       min="0"
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Bidding Ends At</label>
+                    <label className="block text-sm font-medium mb-2 text-slate-300">Bidding Ends At</label>
                     <input
                       type="datetime-local"
                       name="biddingEndsAt"
                       value={formData.biddingEndsAt}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 glass-effect border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                     />
                   </div>
                 </div>
@@ -352,14 +352,14 @@ const AddPropertyPage = () => {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                className="px-6 py-3 glass-effect text-slate-300 rounded-lg hover:bg-slate-700/50 transition-colors border border-slate-600"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 transition-all duration-300 hover:shadow-lg"
               >
                 {loading ? "Adding..." : "Add Property"}
               </button>

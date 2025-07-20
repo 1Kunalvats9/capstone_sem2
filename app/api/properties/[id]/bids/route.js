@@ -2,6 +2,7 @@ import { connectToMongoDb } from "@/lib/connectMongoDb";
 import { Property, Bid } from "@/models/userModel";
 import User from "@/models/userModel";
 import { NextResponse } from "next/server";
+import { getSocket } from "@/lib/socket";
 
 export async function GET(req, { params }) {
   try {
@@ -71,6 +72,18 @@ export async function POST(req, { params }) {
 
     const populatedBid = await Bid.findById(newBid._id)
       .populate('bidder', 'userName email');
+
+    // Emit real-time update via WebSocket
+    try {
+      const io = getSocket();
+      io.to(`property-${id}`).emit('new-bid', {
+        bid: populatedBid,
+        newHighestBid: bidAmount,
+        propertyId: id
+      });
+    } catch (error) {
+      console.log('Socket not available:', error.message);
+    }
 
     return NextResponse.json({ 
       message: "Bid placed successfully", 
