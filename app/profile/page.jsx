@@ -12,6 +12,8 @@ const ProfilePage = () => {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('saved');
+
+    const [savedProperties, setSavedProperties] = useState([]);
     const [userProperties, setUserProperties] = useState([]);
     const [userBids, setUserBids] = useState([]);
 
@@ -26,12 +28,17 @@ const ProfilePage = () => {
 
         const fetchUserData = async () => {
             try {
-                const [userRes, propertiesRes, bidsRes] = await Promise.all([
+                const [userRes, savedPropsRes, propertiesRes, bidsRes] = await Promise.all([
                     fetch("/api/get-user", {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email: userEmail }),
                     }),
+                    fetch('/api/properties/getSavedProperties',{
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: userEmail }),
+                    }), // Correct API route for saved properties
                     fetch(`/api/user/properties?email=${userEmail}`),
                     fetch(`/api/user/bids?email=${userEmail}`)
                 ]);
@@ -39,6 +46,12 @@ const ProfilePage = () => {
                 if (userRes.ok) {
                     const userData = await userRes.json();
                     setUser(userData.user);
+                }
+
+                if (savedPropsRes.ok) {
+                    const savedData = await savedPropsRes.json();
+                    setSavedProperties(savedData.savedProperties || []);
+                    console.log(savedData.savedProperties)
                 }
 
                 if (propertiesRes.ok) {
@@ -104,7 +117,7 @@ const ProfilePage = () => {
                             <div className="space-y-4 mb-6 bg-slate-800/50 rounded-lg p-4">
                                 <div className="flex justify-between">
                                     <span className="text-slate-400 font-light">Saved Properties:</span>
-                                    <span className="text-blue-400 font-bold">{user?.saved?.properties?.length || 0}</span>
+                                    <span className="text-blue-400 font-bold">{savedProperties.length}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-slate-400 font-light">Published Properties:</span>
@@ -162,15 +175,24 @@ const ProfilePage = () => {
                             {activeTab === 'saved' && (
                                 <div>
                                     <h3 className="text-2xl font-bold gradient-text mb-6">Saved Properties</h3>
-                                    {user?.saved?.properties?.length > 0 ? (
+                                    {savedProperties.length > 0 ? (
                                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                            {user.saved.properties.map((property) => (
-                                                <PropertyCard
-                                                    key={property._id}
-                                                    property={{...property, id: property._id}}
-                                                    isSavedPage={true}
-                                                />
-                                            ))}
+                                            {savedProperties.map((property) => {
+                                                // Create a formatted object for the card, just like you do for published properties
+                                                const propertyForCard = {
+                                                    ...property, // Copy all existing property fields
+                                                    id: property._id,
+                                                    // Transform the location object into a displayable string
+                                                    location: `${property.location.city}, ${property.location.state}`,
+                                                };
+                                                return (
+                                                    <PropertyCard
+                                                        key={property._id}
+                                                        property={propertyForCard} // Pass the newly formatted object
+                                                        isSavedPage={true}
+                                                    />
+                                                );
+                                            })}
                                         </div>
                                     ) : (
                                         <div className="text-center py-16">
@@ -188,6 +210,7 @@ const ProfilePage = () => {
                                     )}
                                 </div>
                             )}
+
 
                             {activeTab === 'published' && (
                                 <div>
@@ -236,7 +259,7 @@ const ProfilePage = () => {
                                     {userBids.length > 0 ? (
                                         <div className="space-y-4">
                                             {userBids
-                                                .filter(bid => bid.property) // Filter out bids with null property
+                                                .filter(bid => bid.property)
                                                 .map((bid) => (
                                                     <div key={bid._id} className="glass-effect rounded-xl p-6 border border-slate-700 hover:border-slate-600 transition-colors">
                                                         <div className="flex justify-between items-start">

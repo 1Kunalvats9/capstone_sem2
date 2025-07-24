@@ -104,7 +104,7 @@ const PropertyCard = ({ property, isSavedPage = false, setSelectedProperty = () 
             <button
                 onClick={handleSaveClick}
                 className={`absolute top-3 right-3 p-2 rounded-full transition-colors duration-300 z-10 ${
-                    isPropertySaved
+                    isSavedPage
                         ? 'bg-red-500 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-100'
                 }`}

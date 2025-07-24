@@ -43,30 +43,44 @@ export async function POST(req) {
 export async function GET(req) {
   try {
     await connectToMongoDb();
-    const { searchParams } = new URL(req.url);
-    const email = searchParams.get('email');
 
-    if (!email) {
-      return NextResponse.json({ error: "Missing email" }, { status: 400 });
-    }
+    const propertySchemaObject = Property.schema.obj;
 
-    const user = await User.findOne({ email })
-      .populate({
-        path: 'savedProperties',
-        populate: {
-          path: 'owner',
-          select: 'userName email'
+    const simplifySchema = (schema) => {
+      const result = {};
+      for (const key in schema) {
+        if (Object.prototype.hasOwnProperty.call(schema, key)) {
+          const field = schema[key];
+          if (field.type && typeof field.type === 'function') {
+            result[key] = {
+              type: field.type.name,
+              required: field.required || false,
+              unique: field.unique || false,
+              default: field.default,
+              enum: field.enum,
+            };
+          } else if (typeof field === 'object' && !Array.isArray(field)) {
+            result[key] = simplifySchema(field);
+          } else if (Array.isArray(field) && field.length > 0) {
+            result[key] = {
+              type: 'Array',
+              of: field[0].type ? field[0].type.name : 'Object'
+            }
+          }
+          else {
+            result[key] = field.name;
+          }
         }
-      });
+      }
+      return result;
+    };
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    const simplifiedSchema = simplifySchema(propertySchemaObject);
 
-    return NextResponse.json({ savedProperties: user.savedProperties }, { status: 200 });
+    return NextResponse.json({ schema: simplifiedSchema }, { status: 200 });
 
   } catch (error) {
-    console.error("Error fetching saved properties:", error);
-    return NextResponse.json({ error: "Failed to fetch saved properties" }, { status: 500 });
+    console.error("Error fetching property schema:", error);
+    return NextResponse.json({ error: "Failed to fetch property schema" }, { status: 500 });
   }
 }
